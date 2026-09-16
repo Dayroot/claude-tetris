@@ -146,6 +146,7 @@ function spawn() {
   next = randomPiece();
   if (collide(current.shape, current.x, current.y)) {
     endGame();
+    return;
   }
   drawNext();
 }
@@ -194,6 +195,9 @@ function draw() {
     for (let c = 0; c < COLS; c++)
       drawBlock(ctx, c, r, board[r][c], BLOCK);
 
+  // al terminar la partida el tablero queda congelado: sin ghost ni pieza actual
+  if (gameOver) return;
+
   // ghost
   const gy = ghostY();
   for (let r = 0; r < current.shape.length; r++)
@@ -241,6 +245,7 @@ function togglePause() {
 }
 
 function loop(ts) {
+  if (gameOver || paused) return;
   const dt = ts - lastTime;
   lastTime = ts;
   dropAccum += dt;
@@ -253,6 +258,8 @@ function loop(ts) {
     }
   }
   draw();
+  // lockPiece() pudo disparar endGame(): no reprogramar otro frame
+  if (gameOver) return;
   animId = requestAnimationFrame(loop);
 }
 
